@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Skulpt Python Runner</title>
+    <script src="https://skulpt.org/js/skulpt.min.js" type="text/javascript"></script>
+    <script src="https://skulpt.org/js/skulpt-stdlib.js" type="text/javascript"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+        }
+        #output {
+            white-space: pre-wrap;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            min-height: 100px;
+            max-height: 300px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="output">Инициализация Python...</div>
+    
+    <script type="text/javascript">
+        // Flag to track if we've already sent the ready message
+        var readySent = false;
+        
+        // Flag to track if we're currently executing code
+        var isExecuting = false;
+        
+        // Function to handle output
+        function outf(text) {
+            var output = document.getElementById("output");
+            output.textContent += text;
+        }
+        
+        // Function to handle input (will be overridden with actual input data)
+        function builtinRead(x) {
+            if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+                throw "File not found: '" + x + "'";
+            return Sk.builtinFiles["files"][x];
+        }
+        
+        // Function to run Python code
+        function runPython(code, inputData) {
+            isExecuting = true;
+            var output = document.getElementById("output");
+            output.textContent = "";
+            
+            // Set up input handling
+            var inputLines = inputData ? inputData.split('\n') : [];
+            var inputIndex = 0;
+            
+            Sk.configure({
+                output: outf,
+                read: builtinRead,
+                inputfun: function(prompt) {
+                    return new Promise(function(resolve) {
+                        if (inputIndex < inputLines.length) {
+                            var line = inputLines[inputIndex++].trim();
+                            // Only output the prompt, not the input value
+                            // This matches standard Python behavior
+                            if (prompt) {
+                                outf(prompt);
+                            }
+                            resolve(line);
+                        } else {
+                            if (prompt) {
+                                outf(prompt);
+                            }
+                            resolve("");
+                        }
+                    });
+                },
+                __future__: Sk.python3
+            });
+            
+            var promise = Sk.misceval.asyncToPromise(function() {
+                return Sk.importMainWithBody("<stdin>", false, code, true);
+            });
+            
+            promise.then(
+                function(mod) {
+                    // Success
+                    window.parent.postMessage({
+                        'type': 'execution_result',
+                        'output': output.textContent
+                    }, '*');
+                    isExecuting = false;
+                },
+                function(err) {
+                    // Error
+                    outf("Error: " + err.toString() + "\n");
+                    window.parent.postMessage({
+                        'type': 'execution_result',
+                        'output': output.textContent
+                    }, '*');
+                    isExecuting = false;
+                }
+            );
+        }
+        
+        // Listen for messages from parent window
+        window.addEventListener('message', function(event) {
+            var data = event.data;
+            if (data.type === 'run_code') {
+                runPython(data.code, data.input);
+            } else if (data.type === 'check_ready' && !isExecuting) {
+                // Only respond if we're not currently executing code
+                window.parent.postMessage({'type': 'python_ready'}, '*');
+            }
+        });
+        
+        // Signal to parent that we're ready, but only once
+        window.onload = function() {
+            if (!readySent) {
+                document.getElementById("output").textContent = "Python готов к выполнению кода";
+                window.parent.postMessage({'type': 'python_ready'}, '*');
+                readySent = true;
+            }
+        };
+    </script>
+</body>
+</html>
+
