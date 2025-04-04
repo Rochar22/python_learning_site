@@ -7,7 +7,6 @@ const inter = Inter({ subsets: ["latin", "cyrillic"] })
 export const metadata = {
   title: "Платформа для изучения Python",
   description: "Интерактивная платформа для изучения Python с задачами разной сложности",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({

@@ -7,7 +7,6 @@ import { ArrowLeft, Bold } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { json } from "stream/consumers";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
