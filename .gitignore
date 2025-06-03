@@ -4,3 +4,9 @@ tempCodeRunnerFile.py
 .git
 .next
 .env
+node_modules
+.next
+npm-debug.log
+.git
+.gitignore
+README.md
