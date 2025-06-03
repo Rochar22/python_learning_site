@@ -19,16 +19,15 @@ services:
       retries: 5
       start_period: 30s
 
-  # FastAPI бэкенд 1
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=postgresql://postgres:admin@db:5432/python_learn
-      - PORT=8000 # Внутренний порт приложения
+      - DATABASE_URL=postgresql+asyncpg://postgres:admin@localhost/python_learn
+      - PORT=5000 # Внутренний порт приложения
     ports:
-      - "2010:8000" # <хост_порт>:<контейнер_порт>
+      - "2010:5000"
     networks:
       - backend_network
     depends_on:
@@ -41,9 +40,8 @@ services:
       context: ./tasks
       dockerfile: Dockerfile
     environment:
-      - PORT=5000 # Внутренний порт приложения
     ports:
-      - "2009:5000" # <хост_порт>:<контейнер_порт>
+      - "2009:8000" # <хост_порт>:<контейнер_порт>
     networks:
       - backend_network
 
