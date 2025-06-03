@@ -16,8 +16,6 @@ class CompleteTask(BaseModel):
     difficulty: int
     code: str
 
-templates = Jinja2Templates(directory="./templates")
-
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -26,7 +24,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.mount("/static", StaticFiles(directory="static", html=True), name="static")
+
 @app.post("/task/")
 async def create_item(task: Task):
     output = get_random_task(task)
