@@ -12,6 +12,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - backend_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d python_learn"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # FastAPI бэкенд 1
   backend:
@@ -20,11 +26,14 @@ services:
       dockerfile: Dockerfile
     environment:
       - DATABASE_URL=postgresql://postgres:admin@db:5432/python_learn
-      - PORT=8000
-    expose:
-      - "8000"  # Доступно только внутри Docker-сети
+      - PORT=8000 # Внутренний порт приложения
+    ports:
+      - "2010:8000" # <хост_порт>:<контейнер_порт>
     networks:
       - backend_network
+    depends_on:
+      db:
+        condition: service_healthy
 
   # FastAPI бэкенд 2
   tasks:
@@ -32,31 +41,32 @@ services:
       context: ./tasks
       dockerfile: Dockerfile
     environment:
-      - PORT=5000
-    expose:
-      - "5000"  # Доступно только внутри Docker-сети
+      - PORT=5000 # Внутренний порт приложения
+    ports:
+      - "2009:5000" # <хост_порт>:<контейнер_порт>
     networks:
       - backend_network
+
   # React фронтенд
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - NEXT_PUBLIC_API_URL=http://backend:8000
+        - NEXT_PUBLIC_API_URL=http://95.131.149.248:2010
     ports:
-      - "2010:3000"
+      - "2008:3000"
     environment:
       - NODE_ENV=production
     depends_on:
-      - backend
+      - backend # Простой depends_on, чтобы сервисы запустились раньше
       - tasks
     networks:
-      - frontend_network
-      - backend_network
+      - frontend_network # Сеть для связи frontend с внешним миром (через опубликованные порты других сервисов)
+      - backend_network  # Сеть для связи frontend (если он делает запросы на этапе SSR/сборки) с backend/tasks по именам сервисов
 
 networks:
-  frontend_network:
+  frontend_network: # Обычно используется для Nginx, если бы он был перед frontend
   backend_network:
 
 volumes:

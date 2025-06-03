@@ -2,10 +2,10 @@ import requests
 import json
 import time
 
-start = time.time()
+
 
 API_URL = "http://127.0.0.1:11434/api/generate"
-MODEL = "codellama:13b"
+MODEL = "deepseek-r1:7b"
 def generate_task(topic: str, difficult: int):
     PROMPT = "Сгенерируй задачу для программирования на русском. " \
     "отправь в виде выделенного json файла, где описание задачи это 'description', сложность одна цифра 'difficulty', " \
@@ -30,17 +30,48 @@ def generate_task(topic: str, difficult: int):
         response = requests.post(API_URL, json=payload)
         jsondata = json.loads(response.text)
         result = jsondata['response']
+        print(jsondata)
+        '''
         print(result)
         if result[3:7] == 'json':
             last_index = result.rfind('json')
             json_file = json.loads(result[last_index+4:-3])
         else: 
-            json_file = json.loads(result)
-        return json_file
+            json_file = json.loads(result)'''
+        return result
     except Exception as e:
         return {'error': e}
     
+def check_task(code: str, task: str):
+    PROMPT = f"У меня есть задача '{task}' и код для нее '{code}',"\
+    "как ты считаешь данное решение подходит под условие задачи? Ответь в виде json файла"
+    try:
+        payload = {
+            "model": MODEL,
+            "prompt": PROMPT,
+            "stream": False,
+            "Content-Type": "application/json"
+        }
 
-print(generate_task('Строки', 3))
-end = time.time() - start
-print(end)
+        response = requests.post(API_URL, json=payload)
+        jsondata = json.loads(response.text)
+        result = jsondata['response']
+        print(jsondata)
+        '''
+        print(result)
+        if result[3:7] == 'json':
+            last_index = result.rfind('json')
+            json_file = json.loads(result[last_index+4:-3])
+        else: 
+            json_file = json.loads(result)'''
+        return result
+    except Exception as e:
+        return {'error': e}
+
+if __name__ == "__main__":
+    start = time.time()
+    code = "a = input() sum = 0 for i in a: b = int(i) sum += b print(sum)"
+    task = "Напишите программу, которая находит сумму цифр числа."
+    print(check_task(code, task))
+    end = time.time() - start
+    print(end)

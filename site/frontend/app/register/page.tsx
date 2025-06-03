@@ -2,13 +2,17 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Bold } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect} from "react";
+import axios, { AxiosResponse, AxiosError } from "axios";
+import { useAuth } from "@/auth/authContext"
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const { isAuthenticated, loading } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -34,11 +38,14 @@ export default function RegisterPage() {
     setRepeatPassword("");
     if (password == repeatPassword) {
       try {
-        const res = await axios.post("http://localhost:5000/add_user", {
-          email: email,
-          username: username,
-          password: password,
-        });
+        const res: AxiosResponse<User> = await axios.post<User>(
+          "http://localhost:5000/api/add_user",
+          {
+            email: email,
+            username: username,
+            password: password,
+          }
+        );
         setResponse(res.data);
         setError(null);
       } catch (err) {
@@ -49,6 +56,15 @@ export default function RegisterPage() {
       setResponse(res);
     }
   };
+  useEffect(() => {
+    if (isAuthenticated && !loading) {
+      router.push("/");
+    }
+  }, [isAuthenticated, loading, router]);
+
+  if (loading || isAuthenticated){
+    return <p>...</p>
+  }
   return (
     <main className="container flex-auto justify-center mx-auto py-8 px4">
       <header className="flex justify-end mb-8 w-1/2">
@@ -83,7 +99,7 @@ export default function RegisterPage() {
               ></Input>
               {!(isEmailValid(email) || email == "")
                 ? (isDisabled = true) && (
-                    <div className="mb-3 text-white border-2 p-2 border rounded-xl border-black bg-rose-600">
+                    <div className="mb-3 text-white p-2 rounded-xl bg-rose-600">
                       <span>Некорректный E-Mail</span>
                     </div>
                   )
@@ -95,18 +111,19 @@ export default function RegisterPage() {
               ></Input>
               <span className="text-xl">Введите password:</span>
               <Input
-                type="password" 
+                type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
               ></Input>
               <span className="text-xl">Введите password повторно:</span>
               <Input
+                type="password"
                 value={repeatPassword}
                 onChange={(event) => setRepeatPassword(event.target.value)}
               ></Input>
               {isEquel
                 ? (isDisabled = true) && (
-                    <div className="mb-3 text-white border-2 p-2 border rounded-xl border-black bg-rose-600">
+                    <div className="mb-3 text-white p-2  rounded-xl bg-rose-600">
                       <span>Пароли не совпадают</span>
                     </div>
                   )

@@ -15,19 +15,17 @@ def verify_password(plain_password, hashed_password):
 def get_password_hash(password):
     return pwd_context.hash(password)
 
+async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
+    result = await db.execute(select(User).filter(User.email == email))
+    return result.scalars().first()
 
-async def get_exist_user(email, password):
-    async with AsyncSession(engine) as session:
-        result = await session.execute(select(exists().where(User.email == email)))
-        user_exists = result.scalar()
-        if user_exists:
-            result = await session.execute(select(User).where(User.email == email).limit(1))
-            users = result.scalar_one_or_none()
-            verify = verify_password(password, users.password)
-            print(verify)
-            if verify:
-                return True 
-            return False
+async def get_exist_user(db: AsyncSession, email: str, password: str) -> User | None:
+    user = await get_user_by_email(db, email)
+    if not user:
+        return None
+    if not verify_password(password, user.password): 
+        return None
+    return user
 
 async def create_user(db: AsyncSession, username: str, password: str, email: str):
     try:

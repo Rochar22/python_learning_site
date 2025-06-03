@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Play, StopCircle, RefreshCw } from "lucide-react"
+import { Play, StopCircle, RefreshCw, Search } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface PythonRunnerProps {
@@ -139,6 +139,12 @@ for fruit in sorted_fruits:
 
     return () => clearTimeout(timeoutId)
   }, [iframeReady, iframeError, onOutput])
+  const handleCheckCode = () =>{
+    
+
+  }
+  
+
 
   const handleRunCode = () => {
     if (!iframeReady || !iframeRef.current) {
@@ -263,6 +269,10 @@ for fruit in sorted_fruits:
               <div className="absolute bottom-4 right-4 flex space-x-2">
                 {iframeReady && (
                   <>
+                    <Button onClick={handleRunCode}>
+                      <Search className="h-4 w-4 mr-2" />
+                      Проверить
+                    </Button>
                     {isRunning ? (
                       <Button onClick={handleStopCode} variant="destructive">
                         <StopCircle className="h-4 w-4 mr-2" />
