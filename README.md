@@ -1,4 +1,4 @@
-# Запуск для backend и task
+# Запуск backend и task
 Версия python 12 и выше
 ```
 py -m venv .venv
