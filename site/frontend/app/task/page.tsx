@@ -25,7 +25,7 @@ export default function TaskPage() {
       async function getTask(topic, difficulty) {
         try {
             console.log(topic, difficulty)
-            const response = await fetch("http://127.0.0.1:8000/task/", {
+            const response = await fetch("http://localhost:2009/task/", {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',

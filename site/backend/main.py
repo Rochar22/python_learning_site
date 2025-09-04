@@ -30,7 +30,7 @@ config = AuthXConfig(
 auth = AuthX(config=config)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:2008"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -172,4 +172,4 @@ async def read_users_me(current_user: models.User = Depends(get_current_user_fro
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", port=5000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0",port=5000, reload=True)

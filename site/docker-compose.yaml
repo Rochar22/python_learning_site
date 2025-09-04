@@ -10,48 +10,32 @@ services:
       POSTGRES_DB: python_learn
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - backend_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d python_learn"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:admin@localhost/python_learn
-      - PORT=5000 # Внутренний порт приложения
+      - DATABASE_URL=postgresql+asyncpg://postgres:admin@db/python_learn
+      - PORT=5000
+      - SECRET_KEY=f91350a45c716a81b11fe8780c213e6e
     ports:
       - "2010:5000"
-    networks:
-      - backend_network
     depends_on:
-      db:
-        condition: service_healthy
-
+      - db
   # FastAPI бэкенд 2
   tasks:
     build:
       context: ./tasks
       dockerfile: Dockerfile
-    environment:
     ports:
       - "2009:8000" # <хост_порт>:<контейнер_порт>
-    networks:
-      - backend_network
 
   # React фронтенд
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      args:
-        - NEXT_PUBLIC_API_URL=http://95.131.149.248:2010
     ports:
       - "2008:3000"
     environment:
@@ -59,13 +43,6 @@ services:
     depends_on:
       - backend # Простой depends_on, чтобы сервисы запустились раньше
       - tasks
-    networks:
-      - frontend_network # Сеть для связи frontend с внешним миром (через опубликованные порты других сервисов)
-      - backend_network  # Сеть для связи frontend (если он делает запросы на этапе SSR/сборки) с backend/tasks по именам сервисов
-
-networks:
-  frontend_network: # Обычно используется для Nginx, если бы он был перед frontend
-  backend_network:
 
 volumes:
   postgres_data:

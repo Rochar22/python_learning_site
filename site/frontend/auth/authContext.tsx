@@ -27,7 +27,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 let refreshTokenPromise: Promise<boolean> | null = null;
 
 // URL вашего бэкенда
-const API_BASE_URL = 'http://localhost:5000/api'; // Убедитесь, что порт правильный
+const API_BASE_URL = 'http://localhost:2010/api'; // Убедитесь, что порт правильный
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);

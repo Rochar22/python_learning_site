@@ -39,7 +39,7 @@ export default function RegisterPage() {
     if (password == repeatPassword) {
       try {
         const res: AxiosResponse<User> = await axios.post<User>(
-          "http://localhost:5000/api/add_user",
+          "http://localhost:2010/api/add_user",
           {
             email: email,
             username: username,

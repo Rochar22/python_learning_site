@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = "postgresql+asyncpg://postgres:admin@localhost/python_learn"
+DATABASE_URL = "postgresql+asyncpg://postgres:admin@db/python_learn"
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 
